@@ -32,15 +32,15 @@ const _ = require("lodash");
 const host = "http://localhost:5000";
 
 const LocalStorageUpdateItems = (items, newItem, setItem) => {
-        let updatedItem;
-        if (_.isArray(items)){
-          updatedItem = [...items, newItem]
-        } else {
-          updatedItem = [updatedItem]
-        }
-        setItem(updatedItem)
-        localStorage.setItem("chatItems", JSON.stringify(updatedItem))
-}
+  let updatedItem;
+  if (_.isArray(items)) {
+    updatedItem = [...items, newItem];
+  } else {
+    updatedItem = [updatedItem];
+  }
+  setItem(updatedItem);
+  localStorage.setItem("chatItems", JSON.stringify(updatedItem));
+};
 
 function Avatar({
   avatar_url,
@@ -215,8 +215,8 @@ function Avatar({
 
     makeSpeech(text)
       .then((response) => {
-        const updatedItem = {"type": "bot", message: text}
-        LocalStorageUpdateItems(chatItems, updatedItem, setChatItems)
+        const updatedItem = { type: "bot", message: text };
+        LocalStorageUpdateItems(chatItems, updatedItem, setChatItems);
 
         let { blendData, filename } = response.data;
 
@@ -233,7 +233,7 @@ function Avatar({
 
         setClips(newClips);
         setAudioSource(filename);
-        setText("")
+        setText("");
       })
       .catch((err) => {
         console.error(err);
@@ -318,6 +318,8 @@ const STYLES = {
     textIndent: 20,
     caretColor: "#03ff00",
     color: "#ffffff",
+    padding: 15,
+    boxSizing: "border-box",
   },
   text: {
     margin: "0px",
@@ -381,7 +383,11 @@ function App() {
   );
   const [audioSource, setAudioSource] = useState(null);
   const [playing, setPlaying] = useState(false);
-  const [chatItems, setChatItems] = useState(localStorage.getItem("chatItems") !== null ? JSON.parse(localStorage.getItem("chatItems")) : [])
+  const [chatItems, setChatItems] = useState(
+    localStorage.getItem("chatItems") !== null
+      ? JSON.parse(localStorage.getItem("chatItems"))
+      : []
+  );
   const inputTxt = useRef(null);
 
   useEffect(() => {
@@ -422,26 +428,37 @@ function App() {
         )}
       </ChatBox>
       <ChatInput>
-        <input
+        <textarea
           rows={4}
           type="text"
           className="chat-input"
           value={text}
           style={STYLES.textarea}
           onChange={(e) => setText(e.target.value.substring(0, 200))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              // Don't generate a new line
+              e.preventDefault();
+
+              const updatedItem = { type: "user", message: text };
+              LocalStorageUpdateItems(chatItems, updatedItem, setChatItems);
+              setSpeak(true);
+            }
+          }}
           ref={inputTxt}
         />
         <IconButton
+          type="submit"
           color="primary"
           variant="contained"
           aria-label="add an alarm"
           size="large"
           style={{ color: "white" }}
           onClick={() => {
-            const updatedItem = {"type": "user", message: text}
-            LocalStorageUpdateItems(chatItems, updatedItem, setChatItems)
+            const updatedItem = { type: "user", message: text };
+            LocalStorageUpdateItems(chatItems, updatedItem, setChatItems);
 
-            setSpeak(true)
+            setSpeak(true);
           }}
         >
           {text.trim() === "" ? (
