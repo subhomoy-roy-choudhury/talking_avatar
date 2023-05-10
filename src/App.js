@@ -1,4 +1,5 @@
 import React, { Suspense, useEffect, useRef, useState, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   useGLTF,
@@ -30,10 +31,24 @@ const _ = require("lodash");
 
 const host = "http://localhost:5000";
 
+const LocalStorageUpdateItems = (items, newItem, setItem) => {
+        let updatedItem;
+        if (_.isArray(items)){
+          updatedItem = [...items, newItem]
+        } else {
+          updatedItem = [updatedItem]
+        }
+        setItem(updatedItem)
+        localStorage.setItem("chatItems", JSON.stringify(updatedItem))
+}
+
 function Avatar({
   avatar_url,
   speak,
   setSpeak,
+  setText,
+  chatItems,
+  setChatItems,
   text,
   setAudioSource,
   playing,
@@ -200,6 +215,9 @@ function Avatar({
 
     makeSpeech(text)
       .then((response) => {
+        const updatedItem = {"type": "bot", message: text}
+        LocalStorageUpdateItems(chatItems, updatedItem, setChatItems)
+
         let { blendData, filename } = response.data;
 
         let newClips = [
@@ -215,6 +233,7 @@ function Avatar({
 
         setClips(newClips);
         setAudioSource(filename);
+        setText("")
       })
       .catch((err) => {
         console.error(err);
@@ -355,27 +374,18 @@ const ChatText = styled.div`
 
 function App() {
   const audioPlayer = useRef();
-
   const [speak, setSpeak] = useState(false);
   const [text, setText] = useState(
     "My name is Arwen. I'm a virtual human who can speak whatever you type here along with realistic facial movements."
   );
   const [audioSource, setAudioSource] = useState(null);
   const [playing, setPlaying] = useState(false);
-  const [chatItems, setChatItems] = useState([]);
+  const [chatItems, setChatItems] = useState(localStorage.getItem("chatItems") !== null ? JSON.parse(localStorage.getItem("chatItems")) : [])
   const inputTxt = useRef(null);
 
   useEffect(() => {
     inputTxt.current.focus();
   });
-
-  useEffect(() => {
-    if (speak) {
-      const updatedChatItems = [...chatItems, { type: "user", message: text }];
-      setChatItems(updatedChatItems);
-      setText("");
-    }
-  }, [speak]);
 
   // End of play
   function playerEnded(e) {
@@ -397,14 +407,18 @@ function App() {
         <button onClick={() => setSpeak(true)} style={STYLES.speak}> { speak? 'Running...': 'Speak' }</button>       
       </div> */}
       <ChatBox>
-        {chatItems.map((chat) => (
-          <ChatText>
-            <div style={{ color: "purple", whiteSpace: "nowrap" }}>
-              {chat.type} :-{" "}
-            </div>
-            <div style={{ color: "black" }}>{chat.message}</div>
-          </ChatText>
-        ))}
+        {_.isEmpty(chatItems) ? (
+          <></>
+        ) : (
+          chatItems.map((chat, index) => (
+            <ChatText key={`chat-text-${index}`}>
+              <div style={{ color: "purple", whiteSpace: "nowrap" }}>
+                {chat.type} :-{" "}
+              </div>
+              <div style={{ color: "black" }}>{chat.message}</div>
+            </ChatText>
+          ))
+        )}
       </ChatBox>
       <ChatInput>
         <input
@@ -422,7 +436,12 @@ function App() {
           aria-label="add an alarm"
           size="large"
           style={{ color: "white" }}
-          onClick={() => setSpeak(true)}
+          onClick={() => {
+            const updatedItem = {"type": "user", message: text}
+            LocalStorageUpdateItems(chatItems, updatedItem, setChatItems)
+
+            setSpeak(true)
+          }}
         >
           {text.trim() === "" ? (
             <MicIcon fontSize="large" />
@@ -468,6 +487,9 @@ function App() {
             avatar_url="/model.glb"
             speak={speak}
             setSpeak={setSpeak}
+            setText={setText}
+            chatItems={chatItems}
+            setChatItems={setChatItems}
             text={text}
             setAudioSource={setAudioSource}
             playing={playing}
