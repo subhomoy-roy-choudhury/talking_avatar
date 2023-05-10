@@ -355,7 +355,7 @@ const ChatInput = styled.div`
 const ChatBox = styled.div`
   position: absolute;
   top: 20px;
-  left: 10px;
+  right: 10px;
   z-index: 500;
   color: green;
   background-color: rgba(0.1, 0.1, 0.1, 0.3);
@@ -363,6 +363,7 @@ const ChatBox = styled.div`
   width: 32%;
   border-radius: 18px;
   padding: 10px;
+  overflow: auto;
 `;
 
 const ChatText = styled.div`
@@ -415,7 +416,7 @@ function App() {
               <div style={{ color: "purple", whiteSpace: "nowrap" }}>
                 {chat.type} :-{" "}
               </div>
-              <div style={{ color: "black" }}>{chat.message}</div>
+              <div style={{ color: "white" }}>{chat.message}</div>
             </ChatText>
           ))
         )}
