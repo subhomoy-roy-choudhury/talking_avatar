@@ -324,7 +324,7 @@ const STYLES = {
 const ChatInput = styled.div`
   display: flex;
   flex-direction: row;
-  position: relative;
+  position: absolute;
   bottom: 10px;
   left: 10px;
   z-index: 500;
@@ -334,12 +334,12 @@ const ChatInput = styled.div`
 `;
 
 const ChatBox = styled.div`
-  position: relative;
+  position: absolute;
   top: 20px;
   left: 10px;
   z-index: 500;
   color: green;
-  background-color: rgba(0.1,0.1,0.1,0.3);
+  background-color: rgba(0.1, 0.1, 0.1, 0.3);
   height: 70%;
   width: 32%;
   border-radius: 18px;
@@ -353,17 +353,6 @@ const ChatText = styled.div`
   margin: 10px 20px 0px 11px;
 `;
 
-// const ChatItems = [
-//   {
-//     type: "user",
-//     message: "Hi",
-//   },
-//   {
-//     type: "bot",
-//     message: "How are You?",
-//   },
-// ];
-
 function App() {
   const audioPlayer = useRef();
 
@@ -373,18 +362,20 @@ function App() {
   );
   const [audioSource, setAudioSource] = useState(null);
   const [playing, setPlaying] = useState(false);
-  const [chatItems, setChatItems] = useState([])
+  const [chatItems, setChatItems] = useState([]);
   const inputTxt = useRef(null);
 
-  // useEffect(() => {
-  //   inputTxt.current.focus();
-  // });
+  useEffect(() => {
+    inputTxt.current.focus();
+  });
 
-  // useEffect(() => {
-  //   const updatedChatItems = [...chatItems, {type: "user", message: text}]
-  //   setChatItems(updatedChatItems)
-  //   setText("")
-  // }, [speak]);
+  useEffect(() => {
+    if (speak) {
+      const updatedChatItems = [...chatItems, { type: "user", message: text }];
+      setChatItems(updatedChatItems);
+      setText("");
+    }
+  }, [speak]);
 
   // End of play
   function playerEnded(e) {
@@ -401,14 +392,16 @@ function App() {
 
   return (
     <div className="full">
-      <div style={STYLES.area}>
+      {/* <div style={STYLES.area}>
         <textarea rows={4} type="text" style={STYLES.text} value={text} onChange={(e) => setText(e.target.value.substring(0, 200))} />
         <button onClick={() => setSpeak(true)} style={STYLES.speak}> { speak? 'Running...': 'Speak' }</button>       
-      </div>
-      {/* <ChatBox>
+      </div> */}
+      <ChatBox>
         {chatItems.map((chat) => (
           <ChatText>
-            <div style={{ color: "purple" }}>{chat.type} :- </div>
+            <div style={{ color: "purple", whiteSpace: "nowrap" }}>
+              {chat.type} :-{" "}
+            </div>
             <div style={{ color: "black" }}>{chat.message}</div>
           </ChatText>
         ))}
@@ -437,7 +430,7 @@ function App() {
             <SendIcon fontSize="large" />
           )}
         </IconButton>
-      </ChatInput> */}
+      </ChatInput>
 
       <ReactAudioPlayer
         src={audioSource}
@@ -466,9 +459,9 @@ function App() {
           />
         </Suspense>
 
-        <Suspense fallback={null}>
+        {/* <Suspense fallback={null}>
           <Bg />
-        </Suspense>
+        </Suspense> */}
 
         <Suspense fallback={null}>
           <Avatar
