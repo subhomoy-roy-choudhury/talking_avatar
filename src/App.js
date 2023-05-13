@@ -394,6 +394,14 @@ function App() {
     inputTxt.current.focus();
   });
 
+  useEffect(() => {
+    // Reload the Page to update the Canvas
+    window.addEventListener('resize', () => {
+      window.location.reload();
+    });
+  }, []);
+
+
   // End of play
   function playerEnded(e) {
     setAudioSource(null);
@@ -483,7 +491,7 @@ function App() {
           ctx.gl.physicallyCorrectLights = true;
         }}
       >
-        <OrthographicCamera makeDefault zoom={2000} position={[0, 1.65, 1]} />
+        <OrthographicCamera makeDefault zoom={2000} position={[0.1, 1.65, 1]} />
 
         {/* <OrbitControls
         target={[0, 1.65, 0]}
